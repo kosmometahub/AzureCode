@@ -1,0 +1,93 @@
+/* Step 1 Create Master Key */
+--Create master KEY
+
+/* Step 2 Create Create Credentials */
+create database SCOPED credential polydemocredential
+with 
+identity = 'secretIdentity'
+, secret = '*****'
+
+
+/* Step 3 Point to the external Data Source on Storage Account - Blob Storage */
+
+create external data source  polybasedatasource
+WITH
+(
+    TYPE = Hadoop,
+    LOCATION = 'wasbs://polybaseblobcontainer@courserademostoragek.blob.core.windows.net',
+    CREDENTIAL = polydemocredential
+)
+
+/* Step 4 Define the file format (reusable for other files as well) - ASCII */
+
+Create external file format polybasedemofileformat
+WITH
+(
+    FORMAT_TYPE = DELIMITEDTEXT,
+    FORMAT_OPTIONS
+    (
+        FIELD_TERMINATOR = ',',
+        FIRST_ROW = 2
+    )
+)
+
+/* Step 4 Define the file format (reusable for other files as well) - UTF8 */
+
+Create external file format polybaseutf8fileformat
+WITH
+(
+    FORMAT_TYPE = DELIMITEDTEXT,
+    FORMAT_OPTIONS
+    (
+        FIELD_TERMINATOR = ',',
+        STRING_DELIMITER = '""',
+        FIRST_ROW = 2,
+        ENCODING = 'UTF8'
+    )
+)
+
+/* Step 5 Define Table and refer to the External Data Source and Fileformat definition - ASCII */
+
+create external table dbo.customer
+(
+    IndexID INT,
+    CustomerID VARCHAR(100),
+    FirstName VARCHAR(200),
+    LastName VARCHAR(200),
+    Company Varchar(400),
+    City VARCHAR(100),
+    Country VARCHAR(100),
+    Phone1 VARCHAR(50),
+    Phone2 VARCHAR(50),
+    Email VARCHAR(300),
+    SubscriptionDate DATE,
+    Website VARCHAR(500) 
+)
+WITH
+(
+    LOCATION = '/',
+    DATA_SOURCE = polybasedatasource
+    , FILE_FORMAT = polybasedemofileformat
+)
+
+/* Step 5 Define Table and refer to the External Data Source and Fileformat definition - UTF8 */
+
+create external table dbo.customer2
+(
+    IndexID INT,
+    CustomerID VARCHAR(100),
+    FirstName VARCHAR(200),
+    LastName VARCHAR(200),
+)
+WITH
+(
+    LOCATION = '/Customer10.csv',
+    DATA_SOURCE = polybasedatasource
+    , FILE_FORMAT = polybaseUTF8fileformat
+)
+
+/* Step 6 Query Tables */
+
+Select * from Customer
+
+Select * from Customer2
