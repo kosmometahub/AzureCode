@@ -1,2 +1,2 @@
 # AzureCode
-Code for exercised done on Azure.
+Code for exercises done on Azure.
